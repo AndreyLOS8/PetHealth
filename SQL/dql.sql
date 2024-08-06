@@ -1,47 +1,16 @@
--- Consultar usuários
-select 
-    u.id_usuario,
-    u.nome,
-    u.sobrenome,
-    u.cpf,
-    u.data_cadastro,
-    e.rua,
-    e.bairro,
-    e.cidade,
-from 
-    tb_usuarios u 
-left join
-    tb_enderecos e
-on
-    u.id_endereco = e.id_endereco;
 
---Consultar total de usuários cadastrados
+-- Consultar total de usuários cadastrados
 select count(*) as total_usuarios
 from tb_usuarios;
 
---Consultar usuários que nunca realizarão a compra
+-- Consultar usuários que nunca realizarão a compra
 select *
 from tb_usuarios u
 left join tb_pedidos p
 on u.id_usuario = p.id_usuario
 where c.id_usuario is null;
 
---Consultar total de compras realizadas por um usuário
-select
-    p.id_pedidos,
-    p.data_pedido,
-    p.produtos as nome_produto,
-    p.preco,
-from
-    tb_pedidos pd
-join
-    tb_produtos p
-on
-    pd.id_produtos = p.id_produtos
-where
-    pd.id_usuario = 1;
-
---Consultar total de compras filtradas por id do produto
+-- Consultar total de compras filtradas por id do produto
 
 select
     p.produtos, count(pd.id_pedidos) as total_compras
@@ -51,7 +20,7 @@ on pd.id_produtos = p.id_produtos
 where pd.id_produtos = 1
 group by p.produtos;
 
---Consultar produtos a partir do valor base
+-- Consultar produtos a partir do valor base
 
 select id_produtos, nome_produto, descricao, preco
 from tb_produtos
@@ -120,13 +89,15 @@ select * from tb_usuarios where nome like 'Ana%';
 -- Selecionar clientes que fizeram mais de 5 pedidos
 select * from tb_usuarios where id_usuario in (
     select id_usuario from tb_pedidos group by id_usuario having count(*) > 5
-)
-
--- Selecionar clientes que fizeram menos de 5 pedidos
-select * from tb_usuarios where id_usuario in (
-    select id_usuario from tb_pedidos group by id_usuario having count(*) < 5
-)
+);
 
 -- Selecionar todos os pedidos feitos no último mês
-select * from tb_pedidos where data_pedido >= date_sub(curdate(), interval 1 month)
+select * from tb_pedidos where data_pedido >= date_sub(curdate(), interval 1 month);
 
+
+-- fazer as seleçoes a baixo
+-- Selecionar clientes que fizersam menos de 5 pedidos
+-- Consultar total de compras realizadas por um usuário
+-- Consultar usuários
+
+select * from tb_produtos;
