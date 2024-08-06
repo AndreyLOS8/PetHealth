@@ -10,11 +10,6 @@ namespace Models.HttpRequests
         public required string Cep {get; set;}
         public string? Complemento {get; set;}
     }
-    public class CredencialRequest
-    {
-        public required string Email {get; set;}
-        public required string Senha {get; set;}
-    }
     public class UsuarioRequest
     {
         public long Id {get; set;}
