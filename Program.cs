@@ -33,3 +33,48 @@ app.UseSwaggerUI(c =>
 
 app.Run();
 
+var CORS = WebApplication.CreateBuilder(args);
+
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("PermitirTudo",
+        builder => builder
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
+// Adicionar serviços ao contêiner
+builder.Services.AddControllers();
+builder.Services.AddDbContext<PetHealthDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var application = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+// Habilitar CORS
+app.UseCors("PermitirTudo");
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
+
+
