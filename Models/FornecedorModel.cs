@@ -11,12 +11,8 @@ namespace Models
         public long Id { get; set; }
 
         [Required]
-        [Column("nome")]
-        public string Nome { get; set; }
-
-        [Required]
         [MaxLength(64)]
-        [Column("razao_social")]
+        [Column("razao")]
         public string RazaoSocial { get; set; }
         
         [Required]

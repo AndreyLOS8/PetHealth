@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
 using Contexts;
 using Models;
 using Models.HttpRequests;
@@ -19,15 +18,16 @@ namespace Controllers
             _contexto = contexto;
         }
 
-        // POST: api/fornecedores
-        [HttpPost]
+        // POST: api/fornecedores/cadastrar
+        [HttpPost("cadastrar")]
         public ActionResult Cadastrar([FromBody] FornecedorRequest cadastro)
+        {
+             using (var transacaoDeCadastro = _contexto.Database.BeginTransaction())
         {
             try
             {
                 var fornecedor = new Fornecedor
                 {
-                    Nome = cadastro.Nome,
                     RazaoSocial = cadastro.RazaoSocial,
                     Cnpj = cadastro.Cnpj,
                     Telefone = cadastro.Telefone,
@@ -36,51 +36,54 @@ namespace Controllers
                 _contexto.Fornecedores.Add(fornecedor);
                 _contexto.SaveChanges();
 
-                cadastro.Id = fornecedor.Id;
+                transacaoDeCadastro.Commit();
 
-                return StatusCode(201, new { idFornecedor = cadastro.Id });
+                return StatusCode(201, new { idFornecedor = fornecedor.Id });
             }
-            catch(Exception)
+            catch (DbUpdateException dbEx)
+            {               
+                var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
+                return StatusCode(500, new { mensagem = "Erro ao atualizar o banco de dados.", detalhes = innerException });
+            }
+            catch (Exception ex)
             {
-                return StatusCode(500);
+                return StatusCode(500, new { mensagem = "Erro interno no servidor.", detalhes = ex.Message });
             }
         }
-
-        // GET: api/fornecedores/
-        [HttpGet]
-        public ActionResult<IEnumerable<FornecedorResponse>> ObterLista()
-        {
-            try
-            {
-                var fornecedores = _contexto.Fornecedores.ToList();
-
-                return Ok(fornecedores);
-            }
-            catch(Exception)
-            {
-                return StatusCode(500);
-            }
-        }
-        
-        // GET: api/fornecedores/{idProduto}
+    }
+        // GET: api/fornecedores/{idFornecedor}
         [HttpGet("{idFornecedor}")]
         public ActionResult<FornecedorResponse> ObterPelaId(long idFornecedor)
         {
             try
             {
                 var fornecedor = _contexto.Fornecedores
-                                .FirstOrDefault(tb_fornecedores => tb_fornecedores.Id == idFornecedor);
+                    .Where(f => f.Id == idFornecedor)
+                    .Select(f => new FornecedorResponse
+                    {
+                        Id = f.Id,
+                        RazaoSocial = f.RazaoSocial,  // Atualizado para corresponder ao nome da propriedade em FornecedorResponse
+                        Cnpj = f.Cnpj,
+                        Telefone = f.Telefone,
+                        Email = f.Email
+                    })
+                    .FirstOrDefault();
 
                 if (fornecedor == null)
                 {
-                    return NotFound();
+                    return NotFound(new { mensagem = "Fornecedor não encontrado." });
                 }
 
                 return Ok(fornecedor);
             }
-            catch(Exception)
+            catch (DbUpdateException dbEx)
+            {               
+                var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
+                return StatusCode(500, new { mensagem = "Erro ao atualizar o banco de dados.", detalhes = innerException });
+            }
+            catch (Exception ex)
             {
-                return StatusCode(500);
+                return StatusCode(500, new { mensagem = "Erro interno no servidor.", detalhes = ex.Message });
             }
         }
     }
